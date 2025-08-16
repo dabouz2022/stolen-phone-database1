@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stolen Phone Database</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@latest"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-inter antialiased min-h-screen">
+    <!-- Admin Login Modal -->
+    <div id="admin-login" class="admin-login">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Admin Login</h2>
+            <form id="admin-login-form" class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="admin-login-cancel" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm text-sm font-medium hover:bg-blue-700">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="admin-panel">
+        <div class="admin-header">
+            <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+            <button id="admin-logout" class="admin-button danger">Logout</button>
+        </div>
+        <div class="admin-nav">
+            <button class="admin-nav-item active" data-tab="phones">Stolen Phones</button>
+            <button class="admin-nav-item" data-tab="users">Users</button>
+            <button class="admin-nav-item" data-tab="settings">Settings</button>
+        </div>
+        <div class="admin-content">
+            <div id="phones-tab" class="admin-tab active">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Stolen Phones List</h2>
+                    <button class="admin-button">Export Data</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>IMEI</th>
+                                <th>Model</th>
+                                <th>Brand</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stolen-phones-list">
+                            <!-- Stolen phones will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Combined Toggle Controls -->
+    <div class="toggle-controls">
+        <div class="language-toggle">
+            <button class="language-btn active" data-lang="en">EN</button>
+            <button class="language-btn" data-lang="ar">AR</button>
+        </div>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    <div class="background-pattern"></div>
+    <div class="floating-icon phone-icon" style="top: 10%; left: 10%;">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14z"/>
+                </svg>
+            </div>
+    <div class="floating-icon shield-icon" style="top: 20%; right: 10%;">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+        </svg>
+    </div>
+    
+    <header class="hero-header">
+        <div class="hero-background">
+            <div class="hero-pattern"></div>
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-logo">
+                <div class="logo-container">
+                    <svg class="hero-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                    </svg>
+                    <div class="logo-glow"></div>
+                </div>
+                <h1 class="hero-title">Stolen Phone Database</h1>
+            </div>
+                            <p class="hero-subtitle" data-en="Protect your devices and help others by reporting stolen phones" data-ar="احمِ أجهزتك وساعد الآخرين من خلال الإبلاغ عن الهواتف المسروقة">Protect your devices and help others by reporting stolen phones</p>
+        </div>
+    </header>
+
+    <div class="min-h-screen flex flex-col items-center justify-start py-6 sm:py-10 px-2 sm:px-4">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 mb-4 sm:mb-8 text-center animate-fade-in px-4">Stolen Phone Database</h1>
+
+        <div id="message-box" class="w-full max-w-md mx-auto px-4"></div>
+
+        <div class="w-full max-w-md mb-4 sm:mb-6 px-4">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button class="tab-link w-full sm:w-1/2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold py-3 px-4 sm:px-6 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 active text-sm sm:text-base shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-white/30" data-tab="report">
+                    <span class="flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Report Phone
+                    </span>
+                </button>
+                <button class="tab-link w-full sm:w-1/2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold py-3 px-4 sm:px-6 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 text-sm sm:text-base shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl hover:bg-white/30" data-tab="check">
+                    <span class="flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Check Phone
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div id="report" class="tab-content card rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 w-full max-w-md active mx-4">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">Report Stolen Phone</h2>
+            
+
+            
+            <form id="report-form" class="space-y-4">
+                <div class="form-group">
+                    <label for="name" class="block text-gray-700 text-sm font-bold mb-2 text-left">Name:</label>
+                    <input type="text" id="name" name="name" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="block text-gray-700 text-sm font-bold mb-2 text-left">Phone Number:</label>
+                    <input type="text" id="phone" name="phone" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="form-group">
+                    <label for="imei" class="block text-gray-700 text-sm font-bold mb-2 text-left">IMEI:</label>
+                    <input type="text" id="imei" name="imei" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="form-group">
+                    <label for="color" class="block text-gray-700 text-sm font-bold mb-2 text-left">Color:</label>
+                    <input type="text" id="color" name="color" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="form-group">
+                    <label for="model" class="block text-gray-700 text-sm font-bold mb-2 text-left">Model:</label>
+                    <input type="text" id="model" name="model" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="form-group">
+                    <label for="brand" class="block text-gray-700 text-sm font-bold mb-2 text-left">Brand:</label>
+                    <input type="text" id="brand" name="brand" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <div class="file-input-container">
+                    <label for="box-photo" class="file-input-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span id="file-label-text">Choose Box Photo</span>
+                        <input type="file" id="box-photo" name="box-photo" accept="image/*" class="file-input">
+                    </label>
+                    <div id="file-preview" class="file-preview">
+                        <img id="preview-image" src="" alt="Preview">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 w-full flex items-center justify-center shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl">
+                    <span id="submit-text" class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Report Phone
+                    </span>
+                    <div id="loading-spinner" class="loading-spinner ml-2"></div>
+                </button>
+            </form>
+        </div>
+
+        <div id="check" class="tab-content card rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 w-full max-w-md mx-4">
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-800 mb-4 sm:mb-6">Check Stolen Phone</h2>
+            <form id="check-form" class="space-y-4">
+                <div class="form-group">
+                    <label for="check-imei" class="block text-gray-700 text-sm font-bold mb-2 text-left">IMEI:</label>
+                    <input type="text" id="check-imei" name="imei" required class="form-input shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-sm sm:text-base">
+                </div>
+                <button type="submit" class="submit-btn bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 w-full flex items-center justify-center shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl">
+                    <span id="check-submit-text" class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Check IMEI
+                    </span>
+                    <div id="check-loading-spinner" class="loading-spinner ml-2"></div>
+                </button>
+            </form>
+            <div id="result" class="mt-6 text-center font-semibold p-4 rounded-lg transition-all duration-300"></div>
+        </div>
+    </div>
+
+
+
+    <!-- How It Works Section -->
+    <div class="how-it-works mx-4">
+        <h2 class="text-lg sm:text-xl font-semibold text-center mb-6">How It Works</h2>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h4>Report Your Phone</h4>
+                <p>Fill out the form with your phone details including IMEI, brand, model, and upload a photo</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h4>Database Search</h4>
+                <p>Your phone gets added to our database and others can search for it using the IMEI number</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h4>Get Notified</h4>
+                <p>If someone finds your phone, they can check our database and contact you through the provided information</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h4>Recover Your Phone</h4>
+                <p>Coordinate with the finder and authorities to safely recover your device</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section mx-4">
+        <h2 class="text-lg sm:text-xl font-semibold text-center mb-6">Frequently Asked Questions</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>How do I find my IMEI number?</h4>
+                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                <div class="faq-answer">
+                    <p>You can find your IMEI by dialing *#06# on your phone, or go to Settings > About Phone > IMEI. You can also find it on the original box or receipt.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>Is my personal information secure?</h4>
+                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, we use encryption to protect all your data. Your personal information is only shared when someone finds your phone and needs to contact you.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>What should I do if I find a stolen phone?</h4>
+                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Use our "Check Phone" feature to search for the IMEI number. If it's in our database, you'll see the owner's contact information to arrange return.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>How long does my report stay in the database?</h4>
+                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Your report stays active indefinitely until you mark it as recovered or contact us to remove it. You can also update your report anytime.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>Can I report a phone that was lost, not stolen?</h4>
+                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, you can report any missing phone regardless of how it was lost. This helps honest people who find it to return it to you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="police-report mx-4">
+        <h2 class="text-lg sm:text-xl font-semibold">Report to Algerian Police</h2>
+        <p class="text-sm sm:text-base">If your phone has been stolen, you can also report it to the Algerian police through their official online portal. This will help in the official investigation and recovery process.</p>
+        <a href="https://e-nyaba.mjustice.dz/nouvelle_plainte.php" target="_blank" rel="noopener noreferrer" class="police-report-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Report to Police Online
+        </a>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="contact-info">
+                <a href="mailto:abdelhamid.dabouz@yahoo.com" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    <span class="text-sm sm:text-base">abdelhamid.dabouz@yahoo.com</span>
+                </a>
+                <a href="tel:+213655627219" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                    </svg>
+                    <span class="text-sm sm:text-base">0655627219</span>
+                </a>
+                <a href="https://www.linkedin.com/in/abdelhamid-dabouz/" target="_blank" rel="noopener noreferrer" class="contact-item">
+                    <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                    </svg>
+                    <span class="text-sm sm:text-base">LinkedIn</span>
+                </a>
+            </div>
+            
+            <div class="copyright-section">
+                <p class="copyright-text">
+                    © 2024 Stolen Phone Database. All Rights Reserved.
+                </p>
+                <p class="copyright-text-arabic">
+                    © 2024 قاعدة بيانات الهواتف المسروقة. جميع الحقوق محفوظة.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const messageBox = document.getElementById('message-box');
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const checkLoadingSpinner = document.getElementById('check-loading-spinner');
+        const submitText = document.getElementById('submit-text');
+        const checkSubmitText = document.getElementById('check-submit-text');
+        const fileInput = document.getElementById('box-photo');
+        const fileLabelText = document.getElementById('file-label-text');
+        const filePreview = document.getElementById('file-preview');
+        const previewImage = document.getElementById('preview-image');
+
+        // Enhanced Features: Progress, Heat Map, Loading, Success/Error, Confetti, Image Optimization
+        
+
+        
+        // Enhanced Loading States
+        function showLoading(element, message = 'Loading...') {
+            element.classList.add('loading');
+            element.setAttribute('data-loading-message', message);
+        }
+        
+        function hideLoading(element) {
+            element.classList.remove('loading');
+            element.removeAttribute('data-loading-message');
+        }
+        
+        // Success/Error Messages
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+        
+        // Confetti Animation
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            confettiContainer.className = 'confetti-container';
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confettiContainer.appendChild(confetti);
+            }
+            
+            document.body.appendChild(confettiContainer);
+            
+            setTimeout(() => {
+                confettiContainer.remove();
+            }, 5000);
+        }
+        
+        // Image Compression and Optimization
+        function compressImage(file, maxWidth = 800, quality = 0.8) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+                    canvas.width = img.width * ratio;
+                    canvas.height = img.height * ratio;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                
+                img.src = URL.createObjectURL(file);
+            });
+        }
+        
+
+
+        // Language toggle functionality
+        const languageToggle = document.querySelector('.language-toggle');
+        const languageBtns = document.querySelectorAll('.language-btn');
+        const html = document.documentElement;
+
+        const translations = {
+            en: {
+                title: "Stolen Phone Database",
+                reportTab: "Report Phone",
+                checkTab: "Check Phone",
+                reportTitle: "Report Stolen Phone",
+                checkTitle: "Check Stolen Phone",
+                name: "Name",
+                phone: "Phone Number",
+                imei: "IMEI",
+                color: "Color",
+                model: "Model",
+                brand: "Brand",
+                boxPhoto: "Choose Box Photo",
+                submit: "Report Phone",
+                checking: "Checking...",
+                reporting: "Reporting...",
+                success: "Phone reported as stolen successfully!",
+                error: "Error reporting phone. Please try again.",
+                stolen: "Phone is stolen!",
+                notFound: "No information found: This device is not registered in our stolen phones database.",
+                safeMessage: "This device appears to be safe to purchase.",
+                checkAgain: "You can check another IMEI number if needed.",
+                numbersOnly: "must contain only numbers.",
+                imeiLength: "IMEI must be 14 to 16 digits long.",
+                fillAll: "Please fill in all the fields.",
+                adminLogin: "Admin Login",
+                username: "Username",
+                password: "Password",
+                login: "Login",
+                cancel: "Cancel",
+                invalidCredentials: "Invalid credentials",
+                confirmDelete: "Are you sure you want to delete this phone?",
+                phoneDeleted: "Phone deleted successfully",
+                policeReportTitle: "Report to Algerian Police",
+                policeReportDesc: "If your phone has been stolen, you can also report it to the Algerian police through their official online portal. This will help in the official investigation and recovery process.",
+                policeReportBtn: "Report to Police Online",
+                howItWorksTitle: "How It Works",
+                step1Title: "Report Your Phone",
+                step1Desc: "Fill out the form with your phone details including IMEI, brand, model, and upload a photo",
+                step2Title: "Database Search",
+                step2Desc: "Your phone gets added to our database and others can search for it using the IMEI number",
+                step3Title: "Get Notified",
+                step3Desc: "If someone finds your phone, they can check our database and contact you through the provided information",
+                step4Title: "Recover Your Phone",
+                step4Desc: "Coordinate with the finder and authorities to safely recover your device",
+                faqTitle: "Frequently Asked Questions",
+                faq1Question: "How do I find my IMEI number?",
+                faq1Answer: "You can find your IMEI by dialing *#06# on your phone, or go to Settings > About Phone > IMEI. You can also find it on the original box or receipt.",
+                faq2Question: "Is my personal information secure?",
+                faq2Answer: "Yes, we use encryption to protect all your data. Your personal information is only shared when someone finds your phone and needs to contact you.",
+                faq3Question: "What should I do if I find a stolen phone?",
+                faq3Answer: "Use our \"Check Phone\" feature to search for the IMEI number. If it's in our database, you'll see the owner's contact information to arrange return.",
+                faq4Question: "How long does my report stay in the database?",
+                faq4Answer: "Your report stays active indefinitely until you mark it as recovered or contact us to remove it. You can also update your report anytime.",
+                faq5Question: "Can I report a phone that was lost, not stolen?",
+                faq5Answer: "Yes, you can report any missing phone regardless of how it was lost. This helps honest people who find it to return it to you.",
+                copyright: "© 2024 Stolen Phone Database. All Rights Reserved."
+            },
+            ar: {
+                title: "قاعدة بيانات الهواتف المسروقة",
+                reportTab: "الإبلاغ عن هاتف",
+                checkTab: "التحقق من هاتف",
+                reportTitle: "الإبلاغ عن هاتف مسروق",
+                checkTitle: "التحقق من هاتف مسروق",
+                name: "الاسم",
+                phone: "رقم الهاتف",
+                imei: "رقم IMEI",
+                color: "اللون",
+                model: "الموديل",
+                brand: "العلامة التجارية",
+                boxPhoto: "اختر صورة العلبة",
+                submit: "الإبلاغ عن الهاتف",
+                checking: "تحقق",
+                reporting: "جاري الإبلاغ...",
+                success: "تم الإبلاغ عن الهاتف المسروق بنجاح!",
+                error: "خطأ في الإبلاغ عن الهاتف. يرجى المحاولة مرة أخرى.",
+                stolen: "الهاتف مسروق!",
+                notFound: "لم يتم العثور على معلومات: هذا الجهاز غير مسجل في قاعدة بيانات الهواتف المسروقة لدينا.",
+                safeMessage: "يبدو أن هذا الجهاز آمن للشراء.",
+                checkAgain: "يمكنك التحقق من رقم IMEI آخر إذا لزم الأمر.",
+                numbersOnly: "يجب أن يحتوي على أرقام فقط.",
+                imeiLength: "يجب أن يكون رقم IMEI من 14 إلى 16 رقمًا.",
+                fillAll: "يرجى ملء جميع الحقول.",
+                adminLogin: "تسجيل دخول المشرف",
+                username: "اسم المستخدم",
+                password: "كلمة المرور",
+                login: "تسجيل الدخول",
+                cancel: "إلغاء",
+                invalidCredentials: "بيانات غير صحيحة",
+                confirmDelete: "هل أنت متأكد من حذف هذا الهاتف؟",
+                phoneDeleted: "تم حذف الهاتف بنجاح",
+                policeReportTitle: "الإبلاغ للشرطة الجزائرية",
+                policeReportDesc: "إذا تم سرقة هاتفك، يمكنك أيضًا الإبلاغ عنه للشرطة الجزائرية من خلال البوابة الإلكترونية الرسمية. هذا سيساعد في التحقيق الرسمي وعملية الاسترداد.",
+                policeReportBtn: "الإبلاغ للشرطة عبر الإنترنت",
+                howItWorksTitle: "كيف يعمل النظام",
+                step1Title: "أبلغ عن هاتفك",
+                step1Desc: "املأ النموذج بتفاصيل هاتفك بما في ذلك رقم IMEI والعلامة التجارية والموديل وارفع صورة",
+                step2Title: "البحث في قاعدة البيانات",
+                step2Desc: "يتم إضافة هاتفك إلى قاعدة البيانات الخاصة بنا ويمكن للآخرين البحث عنه باستخدام رقم IMEI",
+                step3Title: "احصل على إشعار",
+                step3Desc: "إذا وجد شخص ما هاتفك، يمكنه التحقق من قاعدة البيانات الخاصة بنا والاتصال بك من خلال المعلومات المقدمة",
+                step4Title: "استعد هاتفك",
+                step4Desc: "تنسق مع الشخص الذي وجد الهاتف والسلطات لاسترداد جهازك بأمان",
+                faqTitle: "الأسئلة الشائعة",
+                faq1Question: "كيف أجد رقم IMEI الخاص بهاتفي؟",
+                faq1Answer: "يمكنك العثور على رقم IMEI عن طريق طلب *#06# على هاتفك، أو اذهب إلى الإعدادات > حول الهاتف > IMEI. يمكنك أيضًا العثور عليه على العلبة الأصلية أو الإيصال.",
+                faq2Question: "هل معلوماتي الشخصية آمنة؟",
+                faq2Answer: "نعم، نستخدم التشفير لحماية جميع بياناتك. معلوماتك الشخصية لا تُشارك إلا عندما يجد شخص ما هاتفك ويحتاج للاتصال بك.",
+                faq3Question: "ماذا يجب أن أفعل إذا وجدت هاتفًا مسروقًا؟",
+                faq3Answer: "استخدم ميزة \"التحقق من الهاتف\" للبحث عن رقم IMEI. إذا كان في قاعدة البيانات الخاصة بنا، ستظهر لك معلومات الاتصال بالمالك لترتيب الإرجاع.",
+                faq4Question: "كم من الوقت يبقى بلاغي في قاعدة البيانات؟",
+                faq4Answer: "يبقى بلاغك نشطًا إلى أجل غير مسمى حتى تحدد أنه تم استرداده أو تتصل بنا لإزالته. يمكنك أيضًا تحديث بلاغك في أي وقت.",
+                faq5Question: "هل يمكنني الإبلاغ عن هاتف مفقود وليس مسروق؟",
+                faq5Answer: "نعم، يمكنك الإبلاغ عن أي هاتف مفقود بغض النظر عن كيفية فقدانه. هذا يساعد الأشخاص  الذين يجدونه على إرجاعه لك.",
+                copyright: "© 2024 قاعدة بيانات الهواتف المسروقة. جميع الحقوق محفوظة."
+            }
+        };
+
+        function updateLanguage(lang) {
+            // Update HTML direction and language
+            html.lang = lang;
+            html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update all text content
+            document.querySelector('title').textContent = translations[lang].title;
+            document.querySelector('.hero-title').textContent = translations[lang].title;
+            
+            // Update subtitle
+            const subtitle = document.querySelector('.hero-subtitle');
+            if (subtitle) {
+                subtitle.textContent = subtitle.getAttribute(`data-${lang}`);
+            }
+            
+            // Update tab buttons
+            document.querySelector('[data-tab="report"]').textContent = translations[lang].reportTab;
+            document.querySelector('[data-tab="check"]').textContent = translations[lang].checkTab;
+            
+            // Update form titles
+            document.querySelector('#report h2').textContent = translations[lang].reportTitle;
+            document.querySelector('#check h2').textContent = translations[lang].checkTitle;
+            
+            // Update form labels
+            document.querySelector('label[for="name"]').textContent = translations[lang].name + ':';
+            document.querySelector('label[for="phone"]').textContent = translations[lang].phone + ':';
+            document.querySelector('label[for="imei"]').textContent = translations[lang].imei + ':';
+            document.querySelector('label[for="color"]').textContent = translations[lang].color + ':';
+            document.querySelector('label[for="model"]').textContent = translations[lang].model + ':';
+            document.querySelector('label[for="brand"]').textContent = translations[lang].brand + ':';
+            
+            // Update file input
+            document.getElementById('file-label-text').textContent = translations[lang].boxPhoto;
+            
+            // Update buttons
+            document.getElementById('submit-text').textContent = translations[lang].submit;
+            document.getElementById('check-submit-text').textContent = translations[lang].checking;
+
+            // Update police report section
+            document.querySelector('.police-report h2').textContent = translations[lang].policeReportTitle;
+            document.querySelector('.police-report p').textContent = translations[lang].policeReportDesc;
+            document.querySelector('.police-report-btn').textContent = translations[lang].policeReportBtn;
+            
+            // Update How It Works section
+            document.querySelector('.how-it-works h2').textContent = translations[lang].howItWorksTitle;
+            document.querySelector('.step-card:nth-child(1) h4').textContent = translations[lang].step1Title;
+            document.querySelector('.step-card:nth-child(1) p').textContent = translations[lang].step1Desc;
+            document.querySelector('.step-card:nth-child(2) h4').textContent = translations[lang].step2Title;
+            document.querySelector('.step-card:nth-child(2) p').textContent = translations[lang].step2Desc;
+            document.querySelector('.step-card:nth-child(3) h4').textContent = translations[lang].step3Title;
+            document.querySelector('.step-card:nth-child(3) p').textContent = translations[lang].step3Desc;
+            document.querySelector('.step-card:nth-child(4) h4').textContent = translations[lang].step4Title;
+            document.querySelector('.step-card:nth-child(4) p').textContent = translations[lang].step4Desc;
+            
+            // Update FAQ section
+            document.querySelector('.faq-section h2').textContent = translations[lang].faqTitle;
+            document.querySelector('.faq-item:nth-child(1) .faq-question h4').textContent = translations[lang].faq1Question;
+            document.querySelector('.faq-item:nth-child(1) .faq-answer p').textContent = translations[lang].faq1Answer;
+            document.querySelector('.faq-item:nth-child(2) .faq-question h4').textContent = translations[lang].faq2Question;
+            document.querySelector('.faq-item:nth-child(2) .faq-answer p').textContent = translations[lang].faq2Answer;
+            document.querySelector('.faq-item:nth-child(3) .faq-question h4').textContent = translations[lang].faq3Question;
+            document.querySelector('.faq-item:nth-child(3) .faq-answer p').textContent = translations[lang].faq3Answer;
+            document.querySelector('.faq-item:nth-child(4) .faq-question h4').textContent = translations[lang].faq4Question;
+            document.querySelector('.faq-item:nth-child(4) .faq-answer p').textContent = translations[lang].faq4Answer;
+            document.querySelector('.faq-item:nth-child(5) .faq-question h4').textContent = translations[lang].faq5Question;
+            document.querySelector('.faq-item:nth-child(5) .faq-answer p').textContent = translations[lang].faq5Answer;
+            
+            // Update copyright text
+            document.querySelector('.copyright-text').textContent = translations[lang].copyright;
+            document.querySelector('.copyright-text-arabic').textContent = translations[lang].copyright;
+            
+            // Update language buttons
+            languageBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Update form placeholders
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach(input => {
+                if (input.id === 'name') {
+                    input.placeholder = translations[lang].name;
+                } else if (input.id === 'phone') {
+                    input.placeholder = translations[lang].phone;
+                } else if (input.id === 'imei' || input.id === 'check-imei') {
+                    input.placeholder = translations[lang].imei;
+                } else if (input.id === 'color') {
+                    input.placeholder = translations[lang].color;
+                } else if (input.id === 'model') {
+                    input.placeholder = translations[lang].model;
+                } else if (input.id === 'brand') {
+                    input.placeholder = translations[lang].brand;
+                }
+            });
+
+            // Update result div if it has content
+            const resultContent = document.getElementById('result').innerHTML;
+            if (resultContent) {
+                const isStolen = resultContent.includes('text-red-600');
+                if (isStolen) {
+                    updateStolenPhoneResult(currentPhoneData, lang);
+                } else {
+                    updateNotFoundResult(lang);
+                }
+            }
+        }
+
+        // Store current phone data for language switching
+        let currentPhoneData = null;
+
+        function updateStolenPhoneResult(phone, lang) {
+            if (!phone) return;
+            currentPhoneData = phone;
+            resultDiv.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-red-600 font-bold text-lg mb-2">${translations[lang].stolen}</p>
+                    <div class="text-left space-y-2">
+                        <p><span class="font-semibold">${translations[lang].name}:</span> ${phone.name}</p>
+                        <p><span class="font-semibold">${translations[lang].phone}:</span> ${phone.phone}</p>
+                        <p><span class="font-semibold">${translations[lang].color}:</span> ${phone.color}</p>
+                        <p><span class="font-semibold">${translations[lang].model}:</span> ${phone.model}</p>
+                        <p><span class="font-semibold">${translations[lang].brand}:</span> ${phone.brand}</p>
+                    </div>
+                    ${phone.boxPhoto ? `<img src="${phone.boxPhoto}" alt="Box Photo" class="mt-4 max-w-xs rounded-md shadow-md mx-auto">` : ''}
+                </div>`;
+        }
+
+        function updateNotFoundResult(lang) {
+            resultDiv.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                    <p class="text-green-600 font-bold text-lg">${translations[lang].notFound}</p>
+                    <p class="text-green-600">${translations[lang].safeMessage}</p>
+                    <p class="text-gray-600 text-sm">${translations[lang].checkAgain}</p>
+                    <div class="mt-4 flex justify-center">
+                        <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>`;
+        }
+
+        languageBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                updateLanguage(lang);
+                localStorage.setItem('preferredLanguage', lang);
+            });
+        });
+
+        // Load preferred language from localStorage
+        const preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
+        updateLanguage(preferredLanguage);
+
+        function showMessage(message, type = 'success') {
+            const lang = html.lang;
+            if (type === 'error') {
+                if (message.includes('numbers')) {
+                    message = translations[lang].numbersOnly;
+                } else if (message.includes('IMEI must be')) {
+                    message = translations[lang].imeiLength;
+                } else if (message.includes('fill in all')) {
+                    message = translations[lang].fillAll;
+                }
+            }
+            messageBox.textContent = message;
+            messageBox.className = `fixed top-4 left-1/2 transform -translate-x-1/2 bg-${type === 'success' ? 'green' : 'red'}-100 text-${type === 'success' ? 'green' : 'red'}-700 border border-${type === 'success' ? 'green' : 'red'}-400 px-4 py-2 rounded shadow-md`;
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }   
+
+        function showLoading(buttonType) {
+            const lang = html.lang;
+            if (buttonType === 'report') {
+                loadingSpinner.style.display = 'block';
+                submitText.textContent = translations[lang].reporting;
+            } else {
+                checkLoadingSpinner.style.display = 'block';
+                checkSubmitText.textContent = translations[lang].checking;
+            }
+        }
+
+        function hideLoading(buttonType) {
+            const lang = html.lang;
+            if (buttonType === 'report') {
+                loadingSpinner.style.display = 'none';
+                submitText.textContent = translations[lang].submit;
+            } else {
+                checkLoadingSpinner.style.display = 'none';
+                checkSubmitText.textContent = translations[lang].checking;
+            }
+        }
+
+        tabLinks.forEach(tabLink => {
+            tabLink.addEventListener('click', () => {
+                const tab = tabLink.dataset.tab;
+                tabLinks.forEach(link => link.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                tabLink.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+            });
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileLabelText.textContent = file.name;
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    filePreview.classList.add('show');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileLabelText.textContent = 'Choose Box Photo';
+                filePreview.classList.remove('show');
+                previewImage.src = '';
+            }
+        });
+
+        // Clear preview when form is reset
+        const reportForm = document.getElementById('report-form');
+        reportForm.addEventListener('reset', () => {
+            filePreview.classList.remove('show');
+            previewImage.src = '';
+            fileLabelText.textContent = 'Choose Box Photo';
+        });
+
+        const checkForm = document.getElementById('check-form');
+        const resultDiv = document.getElementById('result');
+
+        let stolenPhones = [];
+        if (localStorage.getItem('stolenPhones')) {
+            stolenPhones = JSON.parse(localStorage.getItem('stolenPhones'));
+        }
+
+        reportForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showLoading('report');
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const imei = document.getElementById('imei').value;
+            const color = document.getElementById('color').value;
+            const model = document.getElementById('model').value;
+            const brand = document.getElementById('brand').value;
+            const boxPhotoInput = document.getElementById('box-photo');
+            const boxPhotoFile = boxPhotoInput.files[0];
+
+            if (!name || !phone ||!imei || !color || !model || !brand) {
+                showMessage('Please fill in all the fields.', 'error');
+                hideLoading('report');
+                return;
+            }
+             if (!/^\d+$/.test(phone)) {
+                showMessage('Phone Number must contain only numbers.', 'error');
+                hideLoading('report');
+                return;
+            }
+
+            if (!/^\d+$/.test(imei)) {
+                showMessage('IMEI must contain only numbers.', 'error');
+                hideLoading('report');
+                return;
+            }
+
+             if (imei.length < 14 || imei.length > 16) {
+                showMessage('IMEI must be 14 to 16 digits long.', 'error');
+                hideLoading('report');
+                return;
+            }
+
+            let boxPhotoURL = "";
+            if (boxPhotoFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    boxPhotoURL = e.target.result;
+                    fetch('/report-stolen', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, phone, imei, color, model, brand, boxPhoto: boxPhotoURL }),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showMessage('Phone reported as stolen successfully!');
+                            reportForm.reset();
+                            fileLabelText.textContent = 'Choose Box Photo';
+                             stolenPhones.push({ name, phone, imei, color, model, brand, boxPhoto: boxPhotoURL });
+                            localStorage.setItem('stolenPhones', JSON.stringify(stolenPhones));
+                        } else {
+                            showMessage('Error reporting phone. Please try again.', 'error');
+                        }
+                        hideLoading('report');
+                    })
+                    .catch(error => {
+                        console.error('Fetch Error:', error);
+                        showMessage('Error: ' + error.message, 'error');
+                        hideLoading('report');
+                    });
+                };
+                reader.onerror = (error) => {
+                    showMessage('Error reading the file. Please try again.', 'error');
+                    console.error("FileReader Error:", error);
+                    hideLoading('report');
+                    return;
+                };
+                reader.readAsDataURL(boxPhotoFile);
+            } else {
+                fetch('/report-stolen', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, phone, imei, color, model, brand, boxPhoto: boxPhotoURL }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Phone reported as stolen successfully!');
+                        reportForm.reset();
+                         stolenPhones.push({ name, phone, imei, color, model, brand, boxPhoto: boxPhotoURL });
+                        localStorage.setItem('stolenPhones', JSON.stringify(stolenPhones));
+                    } else {
+                        showMessage('Error reporting phone. Please try again.', 'error');
+                    }
+                    hideLoading('report');
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    showMessage('Error: ' + error.message, 'error');
+                    hideLoading('report');
+                });
+            }
+        });
+
+        checkForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showLoading('check');
+            const imeiToCheck = document.getElementById('check-imei').value;
+             if (!/^\d+$/.test(imeiToCheck)) {
+                showMessage('Phone Number ' + translations[html.lang].numbersOnly, 'error');
+                hideLoading('check');
+                return;
+            }
+            if (imeiToCheck.length < 14 || imeiToCheck.length > 16) {
+                showMessage(translations[html.lang].imeiLength, 'error');
+                hideLoading('check');
+                return;
+            }
+            fetch(`/check-imei?imei=${imeiToCheck}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const lang = html.lang;
+                    if (data.found) {
+                        currentPhoneData = data.phone;
+                        updateStolenPhoneResult(data.phone, lang);
+                    } else {
+                        currentPhoneData = null;
+                        updateNotFoundResult(lang);
+                    }
+                    hideLoading('check');
+                })
+                .catch(error => {
+                    showMessage(translations[html.lang].error, 'error');
+                    console.error('Error:', error);
+                    hideLoading('check');
+                });
+        });
+
+        // Remove the admin button and modify admin panel access
+        const adminLogin = document.getElementById('admin-login');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminLoginCancel = document.getElementById('admin-login-cancel');
+        const adminPanel = document.getElementById('admin-panel');
+        const adminLogout = document.getElementById('admin-logout');
+        const stolenPhonesList = document.getElementById('stolen-phones-list');
+
+        // Admin credentials
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admin123';
+
+        // Check if URL contains /admin
+        function checkAdminURL() {
+            if (window.location.pathname.endsWith('/admin')) {
+                adminLogin.classList.add('show');
+            }
+        }
+
+        // Listen for URL changes
+        window.addEventListener('popstate', checkAdminURL);
+        
+        // Check on page load
+        document.addEventListener('DOMContentLoaded', checkAdminURL);
+
+        adminLoginCancel.addEventListener('click', () => {
+            adminLogin.classList.remove('show');
+            adminLoginForm.reset();
+            window.history.pushState({}, '', window.location.pathname.replace('/admin', ''));
+        });
+
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                localStorage.setItem('adminAuthorized', 'true');
+                window.location.href = '/admin.html';
+            } else {
+                showMessage('Invalid credentials', 'error');
+            }
+        });
+
+        adminLogout.addEventListener('click', () => {
+            adminPanel.classList.remove('show');
+        });
+
+        function updateStolenPhonesList() {
+            stolenPhonesList.innerHTML = '';
+            stolenPhones.forEach((phone, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${phone.name}</td>
+                    <td>${phone.phone}</td>
+                    <td>${phone.imei}</td>
+                    <td>${phone.model}</td>
+                    <td>${phone.brand}</td>
+                    <td>
+                        <button class="admin-button" onclick="viewPhone(${index})">View</button>
+                        <button class="admin-button danger" onclick="deletePhone(${index})">Delete</button>
+                    </td>
+                `;
+                stolenPhonesList.appendChild(row);
+            });
+        }
+
+        function viewPhone(index) {
+            const phone = stolenPhones[index];
+            // Implement view functionality
+            console.log('Viewing phone:', phone);
+        }
+
+        function deletePhone(index) {
+            if (confirm('Are you sure you want to delete this phone?')) {
+                stolenPhones.splice(index, 1);
+                localStorage.setItem('stolenPhones', JSON.stringify(stolenPhones));
+                updateStolenPhonesList();
+                showMessage('Phone deleted successfully');
+            }
+        }
+
+        // Dark Mode Functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+            } else {
+                themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+            }
+        }
+
+        // Enhanced Loading States
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        function showGlobalLoading() {
+            loadingOverlay.classList.add('show');
+        }
+
+        function hideGlobalLoading() {
+            loadingOverlay.classList.remove('show');
+        }
+
+        function showFormLoading(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.classList.add('form-loading');
+            }
+        }
+
+        function hideFormLoading(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.classList.remove('form-loading');
+            }
+        }
+
+        // Enhanced form submission with new features
+        document.getElementById('report-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const submitBtn = form.querySelector('.submit-btn');
+            const submitText = document.getElementById('submit-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            // Show loading state
+            showLoading(form, translations[html.lang].reporting);
+            submitText.textContent = translations[html.lang].reporting;
+            loadingSpinner.classList.add('show');
+            submitBtn.disabled = true;
+            
+            try {
+                // Get form data
+                const formData = new FormData(form);
+                
+                // Compress image if uploaded
+                const imageFile = formData.get('box-photo');
+                if (imageFile && imageFile.size > 0) {
+                    const compressedImage = await compressImage(imageFile);
+                    formData.set('box-photo', compressedImage);
+                }
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Success
+                hideLoading(form);
+                showSuccess(translations[html.lang].success);
+                createConfetti();
+                
+                // Reset form
+                form.reset();
+                
+            } catch (error) {
+                hideLoading(form);
+                showError(translations[html.lang].error);
+            } finally {
+                submitText.textContent = translations[html.lang].submit;
+                loadingSpinner.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('check-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showFormLoading('check-form');
+            
+            // Simulate loading for better UX
+            setTimeout(() => {
+                // Your existing form submission logic here
+                hideFormLoading('check-form');
+            }, 1000);
+        });
+
+        // FAQ Accordion Functionality
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            const answer = item.querySelector('.faq-answer');
+            
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                
+                // Close all other FAQ items
+                faqItems.forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize enhanced features
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Enhanced features initialized: Loading, Success/Error, Confetti, Image Optimization');
+        });
+    </script>
+</body>
+</html>

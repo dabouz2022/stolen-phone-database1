@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Stolen Phone Database</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --golden-ratio: 1.618;
+            --primary-color: #4f46e5;
+            --secondary-color: #7c3aed;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border-radius: 1rem;
+            --spacing-unit: 1rem;
+            --mobile-breakpoint: 768px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--bg-secondary);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f6f8fc 0%, #e9f0f7 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: var(--text-primary);
+            line-height: var(--golden-ratio);
+            overflow-x: hidden;
+        }
+
+        .admin-container {
+            max-width: calc(1200px * var(--golden-ratio));
+            margin: calc(var(--spacing-unit) * var(--golden-ratio)) auto;
+            padding: 0 calc(var(--spacing-unit) * var(--golden-ratio));
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Enhanced Responsive Design for Admin */
+        @media (max-width: 1400px) {
+            .admin-container {
+                max-width: 1200px;
+                margin: 2rem auto;
+                padding: 0 2rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .admin-container {
+                max-width: 100%;
+                margin: 1.5rem auto;
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .admin-nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .admin-nav-item {
+                width: 100%;
+                text-align: center;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .admin-content {
+                padding: 1rem;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .analytics-card {
+                padding: 1.5rem;
+            }
+            
+            .chart-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .theme-toggle svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-container {
+                margin: 0.5rem auto;
+                padding: 0 0.5rem;
+            }
+            
+            .admin-header {
+                padding: 0.75rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .admin-nav {
+                padding: 0.75rem;
+            }
+            
+            .admin-nav-item {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .admin-content {
+                padding: 0.75rem;
+            }
+            
+            .analytics-card {
+                padding: 1rem;
+            }
+            
+            .analytics-card h3 {
+                font-size: 0.875rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .analytics-card .value {
+                font-size: 1.125rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .analytics-card .change {
+                font-size: 0.75rem;
+            }
+            
+            .chart-container {
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .chart-container h3 {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .theme-toggle svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .admin-container {
+                padding: 0 0.25rem;
+            }
+            
+            .admin-header {
+                padding: 0.5rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.125rem;
+            }
+            
+            .admin-nav-item {
+                padding: 0.625rem;
+                font-size: 0.8rem;
+            }
+            
+            .admin-content {
+                padding: 0.5rem;
+            }
+            
+            .analytics-card {
+                padding: 0.75rem;
+            }
+            
+            .analytics-card h3 {
+                font-size: 0.8rem;
+            }
+            
+            .analytics-card .value {
+                font-size: 1rem;
+            }
+            
+            .analytics-card .change {
+                font-size: 0.7rem;
+            }
+            
+            .theme-toggle {
+                width: 35px;
+                height: 35px;
+                top: 8px;
+                right: 8px;
+            }
+            
+            .theme-toggle svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        /* Landscape Mobile Optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .admin-container {
+                margin: 0.5rem auto;
+                padding: 0 1rem;
+            }
+            
+            .admin-header {
+                padding: 0.75rem;
+            }
+            
+            .admin-nav {
+                flex-direction: row;
+                gap: 1rem;
+            }
+            
+            .admin-nav-item {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* High DPI Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .admin-button,
+            .admin-nav-item {
+                border-width: 0.5px;
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .loading-spinner {
+                animation: none;
+            }
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            border-radius: calc(var(--border-radius) * 1.2);
+            padding: calc(var(--spacing-unit) * var(--golden-ratio));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: calc(var(--spacing-unit) * var(--golden-ratio));
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: calc(var(--spacing-unit) * var(--golden-ratio));
+            margin-bottom: calc(var(--spacing-unit) * var(--golden-ratio));
+            background: var(--bg-primary);
+            padding: calc(var(--spacing-unit) / var(--golden-ratio));
+            border-radius: calc(var(--border-radius) * 1.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-nav-item {
+            padding: calc(var(--spacing-unit) / var(--golden-ratio)) calc(var(--spacing-unit) * var(--golden-ratio));
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-radius: calc(var(--border-radius) * 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: calc(1rem / var(--golden-ratio));
+        }
+
+        .admin-nav-item:hover {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .admin-nav-item.active {
+            color: #4f46e5;
+            background: rgba(79, 70, 229, 0.1);
+        }
+
+        .admin-nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #4f46e5;
+            border-radius: 50%;
+        }
+
+        .admin-content {
+            background: var(--bg-primary);
+            border-radius: calc(var(--border-radius) * 1.2);
+            padding: calc(var(--spacing-unit) * var(--golden-ratio));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: var(--spacing-unit);
+        }
+
+        .admin-table th {
+            background: var(--bg-secondary);
+            padding: calc(var(--spacing-unit) / var(--golden-ratio));
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 2px solid #e5e7eb;
+            font-size: calc(1rem / var(--golden-ratio));
+        }
+
+        .admin-table td {
+            padding: calc(var(--spacing-unit) / var(--golden-ratio));
+            border-bottom: 1px solid #e5e7eb;
+            color: var(--text-secondary);
+            font-size: calc(1rem / var(--golden-ratio));
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table tr:hover {
+            background: rgba(79, 70, 229, 0.05);
+            transform: translateX(4px);
+        }
+
+        .admin-button {
+            padding: calc(var(--spacing-unit) / var(--golden-ratio)) var(--spacing-unit);
+            border: none;
+            border-radius: calc(var(--border-radius) * 0.8);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+            font-size: calc(1rem / var(--golden-ratio));
+        }
+
+        .admin-button:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .admin-button.danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        .admin-button.danger:hover {
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+
+        .message {
+            padding: var(--spacing-unit);
+            border-radius: calc(var(--border-radius) * 0.8);
+            margin-bottom: var(--spacing-unit);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: calc(var(--spacing-unit) / var(--golden-ratio));
+            animation: slideIn 0.3s ease;
+            font-size: calc(1rem / var(--golden-ratio));
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            color: white;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            padding: calc(var(--spacing-unit) * var(--golden-ratio));
+            border-radius: calc(var(--border-radius) * 1.2);
+            max-width: calc(600px * var(--golden-ratio));
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: #4f46e5;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+            gap: calc(var(--spacing-unit) * var(--golden-ratio));
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .space-x-2 > * + * {
+            margin-left: calc(var(--spacing-unit) / var(--golden-ratio));
+        }
+
+        .mb-4 {
+            margin-bottom: calc(var(--spacing-unit) * var(--golden-ratio));
+        }
+
+        .mb-6 {
+            margin-bottom: calc(var(--spacing-unit) * var(--golden-ratio) * 1.5);
+        }
+
+        .mt-4 {
+            margin-top: calc(var(--spacing-unit) * var(--golden-ratio));
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .text-gray-800 {
+            color: #1f2937;
+        }
+
+        .text-red-500 {
+            color: #ef4444;
+        }
+
+        .text-xl {
+            font-size: calc(1.25rem * var(--golden-ratio));
+        }
+
+        .text-lg {
+            font-size: calc(1.125rem * var(--golden-ratio));
+        }
+
+        .text-sm {
+            font-size: calc(0.875rem / var(--golden-ratio));
+        }
+
+        .font-medium {
+            font-weight: 500;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .rounded-lg {
+            border-radius: calc(var(--border-radius) * 0.8);
+        }
+
+        .shadow {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .max-w-full {
+            max-width: 100%;
+        }
+
+        .h-auto {
+            height: auto;
+        }
+
+        /* Add smooth transitions */
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Add subtle animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .admin-header h1 {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Add modern scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 0 var(--spacing-unit);
+                margin: var(--spacing-unit) auto;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                gap: var(--spacing-unit);
+                text-align: center;
+                padding: var(--spacing-unit);
+            }
+
+            .admin-nav {
+                flex-direction: column;
+                gap: calc(var(--spacing-unit) / 2);
+            }
+
+            .admin-nav-item {
+                width: 100%;
+                text-align: center;
+            }
+
+            .admin-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .admin-table th,
+            .admin-table td {
+                min-width: 120px;
+                white-space: nowrap;
+            }
+
+            .admin-button {
+                width: 100%;
+                margin-bottom: calc(var(--spacing-unit) / 2);
+            }
+
+            .space-x-2 > * + * {
+                margin-left: 0;
+                margin-top: calc(var(--spacing-unit) / 2);
+            }
+
+            .flex.justify-between {
+                flex-direction: column;
+                gap: var(--spacing-unit);
+            }
+
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: var(--spacing-unit);
+                padding: var(--spacing-unit);
+            }
+
+            .admin-content {
+                padding: var(--spacing-unit);
+            }
+
+            .text-xl {
+                font-size: 1.25rem;
+            }
+
+            .text-lg {
+                font-size: 1.125rem;
+            }
+        }
+
+        /* Add touch-friendly styles */
+        .admin-button,
+        .admin-nav-item {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Improve table responsiveness */
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: var(--spacing-unit);
+        }
+
+        @media (max-width: 480px) {
+            .admin-table th,
+            .admin-table td {
+                padding: calc(var(--spacing-unit) / 2);
+                font-size: 0.875rem;
+            }
+
+            .admin-button {
+                padding: calc(var(--spacing-unit) / 2);
+                font-size: 0.875rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Add mobile-specific animations */
+        @media (max-width: 768px) {
+            .admin-table tr:hover {
+                transform: none;
+                background: rgba(79, 70, 229, 0.05);
+            }
+
+            .admin-button:hover {
+                transform: none;
+            }
+        }
+
+        /* Improve modal for mobile */
+        @media (max-width: 768px) {
+            .modal {
+                padding: var(--spacing-unit);
+            }
+
+            .modal-content {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Add safe area insets for iOS */
+        @supports (padding: max(0px)) {
+            .admin-container {
+                padding-left: max(var(--spacing-unit), env(safe-area-inset-left));
+                padding-right: max(var(--spacing-unit), env(safe-area-inset-right));
+            }
+        }
+
+        /* Login form styles */
+        .setup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .setup-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="message-box"></div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="admin-panel">
+        <div class="admin-header">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <button class="admin-button text-sm sm:text-base" onclick="refreshAnalytics()">Refresh Data</button>
+                <a href="/" class="admin-button danger text-sm sm:text-base">Exit Admin</a>
+            </div>
+        </div>
+        <div class="admin-nav">
+            <button class="admin-nav-item active" data-tab="dashboard">Dashboard</button>
+            <button class="admin-nav-item" data-tab="pending">Pending Reports</button>
+            <button class="admin-nav-item" data-tab="approved">Approved Reports</button>
+            <button class="admin-nav-item" data-tab="settings">Settings</button>
+        </div>
+        <div class="admin-content">
+            <!-- Dashboard Analytics Tab -->
+            <div id="dashboard-tab" class="admin-tab active">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4 sm:gap-0">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-800">Analytics Dashboard</h2>
+                    <button class="admin-button text-sm sm:text-base" onclick="refreshAnalytics()">Refresh Data</button>
+                </div>
+                
+                <!-- Analytics Cards -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Total Reports</h3>
+                        <div class="value" id="total-reports">0</div>
+                        <div class="change positive" id="reports-change">+0% this week</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Pending Reports</h3>
+                        <div class="value" id="pending-reports">0</div>
+                        <div class="change" id="pending-change">0 new today</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Approved Reports</h3>
+                        <div class="value" id="approved-reports">0</div>
+                        <div class="change positive" id="approved-change">+0% this week</div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Recovery Rate</h3>
+                        <div class="value" id="recovery-rate">0%</div>
+                        <div class="change" id="recovery-change">Based on 0 reports</div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="chart-container">
+                        <h3>Reports by Month</h3>
+                        <canvas id="monthly-chart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Top Brands</h3>
+                        <canvas id="brands-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="chart-container">
+                    <h3>Recent Activity</h3>
+                    <div id="recent-activity" class="space-y-3">
+                        <div class="loading-skeleton"></div>
+                        <div class="loading-skeleton"></div>
+                        <div class="loading-skeleton"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pending-tab" class="admin-tab">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Pending Reports</h2>
+                    <button class="admin-button" onclick="refreshPendingList()">Refresh List</button>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>IMEI</th>
+                                <th>Model</th>
+                                <th>Brand</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-reports-list">
+                            <!-- Pending reports will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="approved-tab" class="admin-tab">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Approved Reports</h2>
+                    <div class="space-x-2">
+                        <button class="admin-button export-btn" onclick="exportData()">Export Data</button>
+                        <button class="admin-button" onclick="refreshApprovedList()">Refresh List</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>IMEI</th>
+                                <th>Model</th>
+                                <th>Brand</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approved-reports-list">
+                            <!-- Approved reports will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="settings-tab" class="admin-tab" style="display: none;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Database Settings</h2>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Danger Zone</h3>
+                    <p class="text-gray-600 mb-4">This action will permanently delete all data from the database. This cannot be undone.</p>
+                    <button onclick="emptyDatabase()" class="admin-button danger">
+                        Empty Database
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Phone Modal -->
+    <div id="view-modal" class="admin-login" style="display: none;">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Phone Details</h2>
+                <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="phone-details" class="space-y-4">
+                <!-- Phone details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <div class="setup-header">
+                <h1>🔐 Admin Login</h1>
+                <p>Enter your credentials to access the admin panel</p>
+            </div>
+
+            <div id="login-message"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" required 
+                           placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required 
+                           placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="admin-button" id="login-button">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Authentication state
+        let authToken = localStorage.getItem('adminToken');
+        let currentUser = null;
+
+        // Check authentication on page load
+        if (!authToken) {
+            showLoginModal();
+        } else {
+            verifyToken();
+        }
+
+        function showLoginModal() {
+            document.getElementById('login-modal').style.display = 'flex';
+            document.querySelector('.admin-panel').style.display = 'none';
+        }
+
+        function hideLoginModal() {
+            document.getElementById('login-modal').style.display = 'none';
+            document.querySelector('.admin-panel').style.display = 'block';
+        }
+
+        async function verifyToken() {
+            try {
+                const response = await fetch('/api/auth?action=verify', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.valid) {
+                    currentUser = data.user;
+                    hideLoginModal();
+                    initializeAdminPanel();
+                } else {
+                    localStorage.removeItem('adminToken');
+                    showLoginModal();
+                }
+            } catch (error) {
+                console.error('Token verification failed:', error);
+                localStorage.removeItem('adminToken');
+                showLoginModal();
+            }
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const button = document.getElementById('login-button');
+            const messageDiv = document.getElementById('login-message');
+            
+            button.disabled = true;
+            button.textContent = 'Logging in...';
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.action = 'login';
+            
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    authToken = result.token;
+                    currentUser = result.user;
+                    localStorage.setItem('adminToken', authToken);
+                    
+                    messageDiv.innerHTML = `<div class="message success">Login successful!</div>`;
+                    
+                    setTimeout(() => {
+                        hideLoginModal();
+                        initializeAdminPanel();
+                    }, 1000);
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">${result.error}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="message error">Login failed. Please try again.</div>`;
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Login';
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/auth', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ action: 'logout' })
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            
+            localStorage.removeItem('adminToken');
+            authToken = null;
+            currentUser = null;
+            showLoginModal();
+        }
+
+        // Initialize admin panel
+        function initializeAdminPanel() {
+            // Update header with user info
+            const headerTitle = document.querySelector('.admin-header h1');
+            if (currentUser) {
+                headerTitle.textContent = `Admin Dashboard - Welcome, ${currentUser.username}`;
+            }
+            
+            // Update exit button to logout
+            const exitButton = document.querySelector('.admin-header .admin-button.danger');
+            exitButton.textContent = 'Logout';
+            exitButton.onclick = logout;
+            
+            // Initialize with pending reports tab
+            document.querySelector('[data-tab="pending"]').click();
+        }
+
+        // API request helper with authentication
+        async function authenticatedFetch(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...options.headers
+                }
+            };
+            
+            const response = await fetch(url, { ...options, headers: defaultOptions.headers });
+            
+            if (response.status === 401) {
+                // Token expired, redirect to login
+                localStorage.removeItem('adminToken');
+                showLoginModal();
+                throw new Error('Authentication required');
+            }
+            
+            return response;
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('message-box');
+            messageBox.textContent = message;
+            messageBox.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-md ${type === 'success' ? 'bg-green-100 text-green-700 border border-green-400' : 'bg-red-100 text-red-700 border border-red-400'}`;
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        function updatePendingReportsList() {
+            const listElement = document.getElementById('pending-reports-list');
+            listElement.innerHTML = '';
+            
+            authenticatedFetch('/admin/pending-reports')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Pending reports data:', data); // Debug log
+                    if (data.success && data.reports) {
+                        if (data.reports.length === 0) {
+                            listElement.innerHTML = `
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-gray-500">
+                                        No pending reports found
+                                    </td>
+                                </tr>
+                            `;
+                            return;
+                        }
+                        
+                        data.reports.forEach(report => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${formatDate(report.reportDate)}</td>
+                                <td>${report.name}</td>
+                                <td>${report.phone}</td>
+                                <td>${report.imei}</td>
+                                <td>${report.model}</td>
+                                <td>${report.brand}</td>
+                                <td class="space-x-2">
+                                    <button class="admin-button" onclick="viewReport(${report.id})">View</button>
+                                    <button class="admin-button" onclick="approveReport(${report.id})">Approve</button>
+                                    <button class="admin-button danger" onclick="rejectReport(${report.id})">Reject</button>
+                                </td>
+                            `;
+                            listElement.appendChild(row);
+                        });
+                    } else {
+                        console.error('Invalid response format:', data); // Debug log
+                        listElement.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">
+                                    No pending reports found
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching pending reports:', error); // Debug log
+                    showMessage('Error fetching pending reports', 'error');
+                    listElement.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-red-500">
+                                Error loading pending reports
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function updateApprovedReportsList() {
+            const listElement = document.getElementById('approved-reports-list');
+            listElement.innerHTML = '';
+            
+            fetch('/check-all-stolen')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Approved reports data:', data); // Debug log
+                    if (data.success && data.phones) {
+                        if (data.phones.length === 0) {
+                            listElement.innerHTML = `
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-gray-500">
+                                        No approved reports found
+                                    </td>
+                                </tr>
+                            `;
+                            return;
+                        }
+                        
+                        data.phones.forEach(phone => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${formatDate(phone.reportDate)}</td>
+                                <td>${phone.name}</td>
+                                <td>${phone.phone}</td>
+                                <td>${phone.imei}</td>
+                                <td>${phone.model}</td>
+                                <td>${phone.brand}</td>
+                                <td class="space-x-2">
+                                    <button class="admin-button" onclick="viewReport(${phone.id})">View</button>
+                                    <button class="admin-button danger" onclick="deletePhone(${phone.id})">Delete</button>
+                                </td>
+                            `;
+                            listElement.appendChild(row);
+                        });
+                    } else {
+                        console.error('Invalid response format:', data); // Debug log
+                        listElement.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">
+                                    No approved reports found
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching approved reports:', error); // Debug log
+                    showMessage('Error fetching approved reports', 'error');
+                    listElement.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-red-500">
+                                Error loading approved reports
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        function refreshPendingList() {
+            authenticatedFetch('/admin/pending-reports')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updatePendingReportsList();
+                        showMessage('Pending list refreshed successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error refreshing pending list', 'error');
+                });
+        }
+
+        function approveReport(id) {
+            if (confirm('Are you sure you want to approve this report?')) {
+                fetch(`/admin/approve-report/${id}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Report approved successfully');
+                        refreshPendingList();
+                        refreshApprovedList();
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error approving report', 'error');
+                });
+            }
+        }
+
+        function rejectReport(id) {
+            if (confirm('Are you sure you want to reject this report?')) {
+                fetch(`/admin/reject-report/${id}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Report rejected successfully');
+                        refreshPendingList();
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error rejecting report', 'error');
+                });
+            }
+        }
+
+        function deletePhone(id) {
+            if (confirm('Are you sure you want to permanently delete this phone from the database? This action cannot be undone.')) {
+                fetch(`/admin/delete-phone/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Phone deleted successfully');
+                        refreshApprovedList();
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error deleting phone', 'error');
+                });
+            }
+        }
+
+        function viewReport(id) {
+            // First try to find the report in pending reports
+            authenticatedFetch('/admin/pending-reports')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const report = data.reports.find(r => r.id === id);
+                        if (report) {
+                            showPhoneDetails(report);
+                            return;
+                        }
+                    }
+                    // If not found in pending, try approved reports
+                    fetch('/check-all-stolen')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const phone = data.phones.find(p => p.id === id);
+                                if (phone) {
+                                    showPhoneDetails(phone);
+                                } else {
+                                    showMessage('Phone details not found', 'error');
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showMessage('Error fetching phone details', 'error');
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error fetching phone details', 'error');
+                });
+        }
+
+        function showPhoneDetails(phone) {
+            const modal = document.getElementById('view-modal');
+            const detailsContainer = document.getElementById('phone-details');
+            
+            // Format the date
+            const reportDate = new Date(phone.reportDate).toLocaleString();
+            
+            // Create the details HTML
+            detailsContainer.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Report Date</p>
+                        <p class="font-medium">${reportDate}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Name</p>
+                        <p class="font-medium">${phone.name}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Phone Number</p>
+                        <p class="font-medium">${phone.phone}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">IMEI</p>
+                        <p class="font-medium">${phone.imei}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Model</p>
+                        <p class="font-medium">${phone.model}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Brand</p>
+                        <p class="font-medium">${phone.brand}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Color</p>
+                        <p class="font-medium">${phone.color}</p>
+                    </div>
+                </div>
+                ${phone.boxPhoto ? `
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500 mb-2">Box Photo</p>
+                        <img src="${phone.boxPhoto}" alt="Box Photo" class="max-w-full h-auto rounded-lg shadow">
+                    </div>
+                ` : ''}
+            `;
+            
+            // Show the modal
+            modal.style.display = 'flex';
+        }
+
+        function closeViewModal() {
+            const modal = document.getElementById('view-modal');
+            modal.style.display = 'none';
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(stolenPhones, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'stolen_phones.json';
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            showMessage('Data exported successfully', 'success');
+        }
+
+        function emptyDatabase() {
+            if (confirm('WARNING: This will permanently delete ALL data from the database. This action cannot be undone. Are you sure you want to continue?')) {
+                fetch('/admin/empty-database', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Database emptied successfully');
+                        refreshPendingList();
+                        refreshApprovedList();
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error emptying database', 'error');
+                });
+            }
+        }
+
+        function refreshApprovedList() {
+            fetch('/check-all-stolen')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateApprovedReportsList();
+                        showMessage('Approved list refreshed successfully');
+                    } else {
+                        showMessage('Error refreshing approved list', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Error refreshing approved list', 'error');
+                });
+        }
+
+        // Tab navigation
+        const tabButtons = document.querySelectorAll('.admin-nav-item');
+        const tabContents = document.querySelectorAll('.admin-tab');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                
+                // Update active states
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.style.display = 'none');
+                
+                button.classList.add('active');
+                document.getElementById(`${tab}-tab`).style.display = 'block';
+
+                // Refresh the appropriate list
+                if (tab === 'pending') {
+                    refreshPendingList();
+                } else if (tab === 'approved') {
+                    refreshApprovedList();
+                }
+            });
+        });
+
+        // Initialize with dashboard tab
+        document.querySelector('[data-tab="dashboard"]').click();
+
+        // Analytics Dashboard Functions
+        let monthlyChart, brandsChart;
+
+        function refreshAnalytics() {
+            showGlobalLoading();
+            
+            // Fetch analytics data
+            Promise.all([
+                fetch('/api/analytics/overview').then(res => res.json()),
+                fetch('/api/analytics/monthly').then(res => res.json()),
+                fetch('/api/analytics/brands').then(res => res.json()),
+                fetch('/api/analytics/recent').then(res => res.json())
+            ])
+            .then(([overview, monthly, brands, recent]) => {
+                updateAnalyticsCards(overview);
+                updateMonthlyChart(monthly);
+                updateBrandsChart(brands);
+                updateRecentActivity(recent);
+                hideGlobalLoading();
+            })
+            .catch(error => {
+                console.error('Error loading analytics:', error);
+                hideGlobalLoading();
+                showMessage('Error loading analytics data', 'error');
+            });
+        }
+
+        function updateAnalyticsCards(data) {
+            document.getElementById('total-reports').textContent = data.totalReports || 0;
+            document.getElementById('pending-reports').textContent = data.pendingReports || 0;
+            document.getElementById('approved-reports').textContent = data.approvedReports || 0;
+            document.getElementById('recovery-rate').textContent = (data.recoveryRate || 0) + '%';
+            
+            document.getElementById('reports-change').textContent = `${data.reportsChange >= 0 ? '+' : ''}${data.reportsChange || 0}% this week`;
+            document.getElementById('pending-change').textContent = `${data.newToday || 0} new today`;
+            document.getElementById('approved-change').textContent = `${data.approvedChange >= 0 ? '+' : ''}${data.approvedChange || 0}% this week`;
+            document.getElementById('recovery-change').textContent = `Based on ${data.totalReports || 0} reports`;
+        }
+
+        function updateMonthlyChart(data) {
+            const ctx = document.getElementById('monthly-chart').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Reports',
+                        data: data.values || [0, 0, 0, 0, 0, 0],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBrandsChart(data) {
+            const ctx = document.getElementById('brands-chart').getContext('2d');
+            
+            if (brandsChart) {
+                brandsChart.destroy();
+            }
+            
+            brandsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels || ['Samsung', 'Apple', 'Huawei', 'Others'],
+                    datasets: [{
+                        data: data.values || [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#4f46e5',
+                            '#7c3aed',
+                            '#10b981',
+                            '#f59e0b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateRecentActivity(data) {
+            const container = document.getElementById('recent-activity');
+            
+            if (!data.activities || data.activities.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No recent activity</p>';
+                return;
+            }
+            
+            container.innerHTML = data.activities.map(activity => `
+                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium">${activity.description}</p>
+                        <p class="text-xs text-gray-500">${activity.time}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Mock data for demonstration (replace with real API calls)
+        function loadMockAnalytics() {
+            const mockOverview = {
+                totalReports: 156,
+                pendingReports: 23,
+                approvedReports: 133,
+                recoveryRate: 15,
+                reportsChange: 12,
+                newToday: 5,
+                approvedChange: 8
+            };
+
+            const mockMonthly = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                values: [12, 19, 15, 25, 22, 30]
+            };
+
+            const mockBrands = {
+                labels: ['Samsung', 'Apple', 'Huawei', 'Xiaomi', 'Others'],
+                values: [45, 32, 18, 12, 8]
+            };
+
+            const mockRecent = {
+                activities: [
+                    { description: 'New report submitted: iPhone 13', time: '2 minutes ago' },
+                    { description: 'Report approved: Samsung Galaxy S21', time: '15 minutes ago' },
+                    { description: 'New report submitted: Huawei P40', time: '1 hour ago' },
+                    { description: 'Report approved: iPhone 12', time: '2 hours ago' }
+                ]
+            };
+
+            updateAnalyticsCards(mockOverview);
+            updateMonthlyChart(mockMonthly);
+            updateBrandsChart(mockBrands);
+            updateRecentActivity(mockRecent);
+        }
+
+        // Load analytics on dashboard tab click
+        document.querySelector('[data-tab="dashboard"]').addEventListener('click', () => {
+            loadMockAnalytics();
+        });
+
+        // Global loading functions
+        function showGlobalLoading() {
+            const overlay = document.createElement('div');
+            overlay.id = 'global-loading';
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(overlay);
+        }
+
+        function hideGlobalLoading() {
+            const overlay = document.getElementById('global-loading');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+            }`;
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // Dark Mode Functionality for Admin Panel
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+            } else {
+                themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+            }
+        }
+    </script>
+</body>
+</html> 
