@@ -1106,14 +1106,18 @@
     }
 }
 
-/* Smooth Scrolling */
+/* Enhanced Smooth Scrolling */
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
+    /* Enhanced smooth scrolling */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -1129,6 +1133,12 @@ body {
     overflow-x: hidden;
     touch-action: manipulation;
     -webkit-overflow-scrolling: touch;
+    /* Enhanced scrolling performance */
+    scroll-behavior: smooth;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Smooth scrolling for all elements */
+    scroll-behavior: smooth;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -2948,28 +2958,38 @@ h3 {
     }
 }
 
-/* Custom Scrollbar */
+/* Enhanced Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
     transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--secondary-color);
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    background-clip: content-box;
+    transform: scale(1.1);
 }
 
-/* Smooth Scrolling Container */
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) rgba(0, 0, 0, 0.05);
+}
+
+/* Enhanced Smooth Scrolling Container */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -2978,6 +2998,20 @@ h3 {
     z-index: 1;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    /* Enhanced scrolling performance */
+    will-change: scroll-position;
+    transform: translateZ(0);
+}
+
+/* Smooth scrolling for all scrollable elements */
+.admin-panel,
+.admin-content,
+.card,
+.form-container,
+.analytics-grid {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 /* Smooth Transitions */
